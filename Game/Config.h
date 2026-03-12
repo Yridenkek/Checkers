@@ -1,14 +1,12 @@
 #pragma once
-#include <fstream>
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
-
-#include "../Models/Project_path.h"
+#include <string>
+#include <map>
 
 // Класс Config отвечает за загрузку и хранение настроек игры из файла settings.json
 class Config
 {
 public:
+<<<<<<< HEAD
     Config()
     {
         reload(); // при создании объекта автоматически загружаем настройки
@@ -36,4 +34,10 @@ public:
 
 private:
     json config; // объект JSON, в котором хранятся все настройки из settings.json
+=======
+    Config() {}
+
+    void reload() {}  // обновление настроек из файла
+    int operator()(const std::string& section, const std::string& option) const { return 1; }
+>>>>>>> dbd5297 (Step 23)
 };

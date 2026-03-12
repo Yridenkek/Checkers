@@ -1,6 +1,8 @@
 #pragma once
-#include <chrono>
+#include <iostream>
+#include <vector>
 #include <thread>
+#include <chrono>
 #include <fstream>
 #include <vector>
 #include <tuple>
@@ -8,13 +10,18 @@
 
 #include "../Models/Project_path.h"
 #include "Board.h"
-#include "Config.h"
 #include "Hand.h"
 #include "Logic.h"
+#include "Config.h"
+#include "../Models/Response.h"  // путь к Response.h в папке Models
+
+using namespace std;
 
 // Класс Game — основной контроллер игры в шашки
 class Game
 {
+public:
+    Game()
 public:
     // Конструктор класса Game
     // - Создаёт Board с размерами окна из настроек
@@ -22,6 +29,12 @@ public:
     // - Очищает log.txt для нового сеанса игры
     Game() : board(config("WindowSize", "Width"), config("WindowSize", "Hight")), hand(&board), logic(&board, &config)
     {
+        config = new Config();
+        board = new Board();
+        hand = new Hand(board);
+        logic = new Logic(board, config);
+        beat_series = 0;
+    }
         std::ofstream fout(project_path + "log.txt", std::ios_base::trunc);
         fout.close();
     }
@@ -80,6 +93,13 @@ public:
                     if (!beat_series)
                         --turn_num;
 
+    ~Game()
+    {
+        delete logic;
+        delete hand;
+        delete board;  // вызов quit() произойдет в деструкторе Board
+        delete config;
+    }
                     board.rollback();
                     --turn_num;
                     beat_series = 0;
@@ -119,10 +139,12 @@ public:
         return res;
     }
 
+    int play()
 private:
     // Функция хода бота
     void bot_turn(const bool color)
     {
+        if (board->start_draw() != 0)
         auto start = std::chrono::steady_clock::now(); // Засекаем время начала хода бота
 
         auto delay_ms = config("Bot", "BotDelayMS"); // Задержка между ходами
@@ -134,6 +156,9 @@ private:
         // Выполняем все ходы
         for (auto turn : turns)
         {
+            cerr << "Error initializing board textures." << endl;
+            return 1;
+        }
             if (!is_first)
                 SDL_Delay(delay_ms);                // Задержка между ходами
             is_first = false;
@@ -142,6 +167,8 @@ private:
             board.move_piece(turn, beat_series);   // Двигаем фигуру на доске
         }
 
+        bool player_color = 1; // 1 - белые, 0 - черные
+        bool bot_color = 0;
         auto end = std::chrono::steady_clock::now(); // Засекаем время окончания хода
         std::ofstream fout(project_path + "log.txt", std::ios_base::app);
         fout << "Bot turn time: " << (int)std::chrono::duration<double, std::milli>(end - start).count() << " millisec\n";
@@ -163,10 +190,15 @@ private:
         // Первый выбор клетки игроком
         while (true)
         {
+            // --- Ход игрока ---
+            Response resp;
+            signed char xc, yc;
+            std::tie(resp, xc, yc) = hand->get_cell();
             auto resp = hand.get_cell();
             if (std::get<0>(resp) != Response::CELL)
                 return std::get<0>(resp); // Если игрок выбрал quit/back/replay
 
+            if (resp == Response::QUIT)
             std::pair<POS_T, POS_T> cell{ std::get<1>(resp), std::get<2>(resp) };
             bool is_correct = false;
 
@@ -187,6 +219,10 @@ private:
             if (pos.x != -1)
                 break;
 
+            if (resp == Response::BACK)
+            {
+                board->rollback();
+
             if (!is_correct)
             {
                 if (x != -1)
@@ -196,6 +232,12 @@ private:
                     board.highlight_cells(cells);
                 }
                 x = -1; y = -1;
+                continue;
+            }
+
+            if (resp == Response::REPLAY)
+            {
+                board->redraw();
                 continue;
             }
 
@@ -228,6 +270,12 @@ private:
             if (!logic.have_beats)
                 break;
 
+            if (resp == Response::CELL)
+            {
+                // тут обработка хода игрока
+                // move_pos move(xc, yc, ...);
+                // board->move_piece(move, beat_series);
+            }
             std::vector<std::pair<POS_T, POS_T>> cells;
             for (auto turn : logic.turns)
                 cells.emplace_back(turn.x2, turn.y2);
@@ -241,6 +289,13 @@ private:
                 if (std::get<0>(resp) != Response::CELL)
                     return std::get<0>(resp);
 
+            // --- Ход бота ---
+            vector<move_pos> bot_moves = logic->find_best_turns(bot_color);
+            for (auto move : bot_moves)
+            {
+                board->move_piece(move);
+                std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            }
                 std::pair<POS_T, POS_T> cell{ std::get<1>(resp), std::get<2>(resp) };
                 bool is_correct = false;
 
@@ -255,17 +310,20 @@ private:
                 }
                 if (!is_correct) continue;
 
-                board.clear_highlight();
-                board.clear_active();
-                beat_series += 1;
-                board.move_piece(pos, beat_series);
-                break;
-            }
+            // Проверка окончания игры
+            // board->show_final(result);
         }
 
-        return Response::OK;
+        return 0;
     }
 
+private:
+    Board* board;
+    Hand* hand;
+    Logic* logic;
+    Config* config;
+    int beat_series;
+};
 private:
     Config config;   // Настройки игры
     Board board;     // Игровая доска

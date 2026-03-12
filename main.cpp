@@ -1,9 +1,9 @@
 #include "Game/Game.h"
+#include <SDL.h>
+#include <SDL_image.h>
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
     Game g;
-    g.play();
-
-    return 0;
+    return g.play();
 }

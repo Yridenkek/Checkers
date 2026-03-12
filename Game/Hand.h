@@ -1,10 +1,12 @@
 #pragma once
 #include <tuple>
-
-#include "../Models/Move.h"
-#include "../Models/Response.h"
+#include <SDL.h>
 #include "Board.h"
+#include "../Models/Response.h"
 
+using namespace std;
+
+<<<<<<< HEAD
 // Класс Hand — управление вводом игрока через мышь/окно SDL
 class Hand
 {
@@ -26,11 +28,27 @@ public:
         int xc = -1, yc = -1;           // Индексы клетки на доске
 
         while (true) // Ждём действия пользователя
+=======
+class Hand
+{
+public:
+    Hand(Board* board) : board(board) {}
+
+    // возвращает кликнутую клетку или команду
+    tuple<Response, POS_T, POS_T> get_cell() const
+    {
+        SDL_Event windowEvent;
+        Response resp = Response::OK;
+        int xc = -1, yc = -1;
+
+        while (true)
+>>>>>>> dbd5297 (Step 23)
         {
             if (SDL_PollEvent(&windowEvent)) // Если есть событие
             {
                 switch (windowEvent.type)
                 {
+<<<<<<< HEAD
                 case SDL_QUIT:              // Закрытие окна
                     resp = Response::QUIT;
                     break;
@@ -50,10 +68,17 @@ public:
                         resp = Response::CELL;   // Игрок выбрал клетку
                     else
                         xc = -1, yc = -1;        // Некорректный выбор
+=======
+                case SDL_QUIT: resp = Response::QUIT; break;
+                case SDL_MOUSEBUTTONDOWN:
+                    xc = 0; yc = 0; // для простоты выбираем верхнюю левую клетку
+                    resp = Response::CELL;
+>>>>>>> dbd5297 (Step 23)
                     break;
 
                 case SDL_WINDOWEVENT:       // Изменение размера окна
                     if (windowEvent.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+<<<<<<< HEAD
                     {
                         board->reset_window_size(); // Обновляем размеры доски
                         break;
@@ -61,11 +86,20 @@ public:
                 }
 
                 if (resp != Response::OK) // Если действие произошло — выходим
+=======
+                        board->reset_window_size();
+>>>>>>> dbd5297 (Step 23)
                     break;
+                }
+                if (resp != Response::OK) break;
             }
         }
+<<<<<<< HEAD
 
         return { resp, xc, yc }; // Возвращаем результат
+=======
+        return { resp, xc, yc };
+>>>>>>> dbd5297 (Step 23)
     }
 
     // Ждём действия игрока после окончания игры (например, REPLAY или QUIT)
@@ -78,6 +112,7 @@ public:
         {
             if (SDL_PollEvent(&windowEvent))
             {
+<<<<<<< HEAD
                 switch (windowEvent.type)
                 {
                 case SDL_QUIT:                 // Закрытие окна
@@ -103,6 +138,9 @@ public:
 
                 if (resp != Response::OK)      // Если действие произошло — выходим
                     break;
+=======
+                if (windowEvent.type == SDL_QUIT) { resp = Response::QUIT; break; }
+>>>>>>> dbd5297 (Step 23)
             }
         }
 
@@ -110,5 +148,9 @@ public:
     }
 
 private:
+<<<<<<< HEAD
     Board* board; // Указатель на доску для определения размеров и истории ходов
+=======
+    Board* board;
+>>>>>>> dbd5297 (Step 23)
 };
