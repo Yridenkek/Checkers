@@ -1,19 +1,40 @@
 {
-    "WindowSize": {
-        "Width": 0,
-        "Hight": 0
-    },
-    "Bot": {
-        "IsWhiteBot": false,
-        "IsBlackBot": true,
-        "WhiteBotLevel": 0,
-        "BlackBotLevel": 5,
-        "BotScoringType": "NumberAndPotential",
-        "BotDelayMS": 0,
-        "NoRandom": false,
-        "Optimization": "O1"
-    },
-    "Game": {
-        "MaxNumTurns": 120
-    }
+  "WindowSize": {
+    "Width": 0,
+    "comment_Width": "Ширина игрового окна в пикселях. Если 0 — используется значение по умолчанию или размер экрана.",
+
+    "Hight": 0,
+    "comment_Hight": "Высота игрового окна в пикселях. Если 0 — используется значение по умолчанию."
+  },
+
+  "Bot": {
+    "IsWhiteBot": false,
+    "comment_IsWhiteBot": "Определяет, управляет ли бот белыми шашками (true — бот играет за белых).",
+
+    "IsBlackBot": true,
+    "comment_IsBlackBot": "Определяет, управляет ли бот чёрными шашками (true — бот играет за чёрных).",
+
+    "WhiteBotLevel": 0,
+    "comment_WhiteBotLevel": "Уровень сложности бота, играющего белыми. Чем больше значение, тем глубже анализ ходов.",
+
+    "BlackBotLevel": 5,
+    "comment_BlackBotLevel": "Уровень сложности бота, играющего чёрными. Более высокий уровень означает более сильную игру.",
+
+    "BotScoringType": "NumberAndPotential",
+    "comment_BotScoringType": "Тип алгоритма оценки позиции на доске, который использует бот.",
+
+    "BotDelayMS": 0,
+    "comment_BotDelayMS": "Задержка хода бота в миллисекундах. Используется для визуального эффекта.",
+
+    "NoRandom": false,
+    "comment_NoRandom": "Если true — бот будет выбирать строго лучший ход без случайности.",
+
+    "Optimization": "O1",
+    "comment_Optimization": "Уровень оптимизации алгоритма поиска ходов бота."
+  },
+
+  "Game": {
+    "MaxNumTurns": 120,
+    "comment_MaxNumTurns": "Максимальное количество ходов в партии. После достижения лимита игра завершается."
+  }
 }
